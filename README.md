@@ -11,13 +11,13 @@ You need to set the current user's ID before you can use the User ID part of thi
 
 Setting up the flags are simple. We included a helper function to test for the feature with the current user to make your life even simplier! Just use this code
 
-`<?php
-if (can_do_feature('the_feature_name'))
-{
-	// The code to execute if they can perform a feature
+	<?php
+	if (can_do_feature('the_feature_name'))
+	{
+		// The code to execute if they can perform a feature
 	
-}
-?>`
+	}
+	?>
 
 ## Questions?
 Shoot me an email at http://talkingwithsean.com/contact/
