@@ -1,6 +1,7 @@
 {
   "name": "srtfisher/Codeigniter-Features",
   "description": "Codeigniter Feature Flags",
+  "version": "0.3",
   "keywords": [
     "codeigniter",
     "feature flag",
