@@ -3,9 +3,9 @@
  * The feature release system
  * We can release "features" to users and only enable it to be show to certain users.
  * 
- * @version 0.2
- * @author talkingwithsean
- * @license GPL
+ * @version    0.3
+ * @author     srtfisher
+ * @license    GPL
 **/
 class Feature
 {
@@ -15,14 +15,14 @@ class Feature
 	 * @access public
 	 * @global int
 	**/
-	public $current_user = FALSE;
+	public static $current_user = FALSE;
 	
 	/**
 	 * The constructor
 	 *
 	 * @access public
 	**/
-	public function __construct()
+	public static function init()
 	{
 		get_instance()->load->config('features');
 	}
@@ -30,12 +30,15 @@ class Feature
 	/**
 	 *	Set the active user ID to work with.
 	 *
-	 *	@param int The user's ID
+	 *	@param $ID int The user's ID
 	**/
-	function set_user( $ID = FALSE )
-	{
-		$ID = (int) $ID;
-		$this->current_user = $ID;
+	public static function setUser( $ID = FALSE )
+	{	
+		if (! $ID)
+		   return;
+          
+          $ID = (int) $ID;
+		self::$current_user = $ID;
 	}
 	
 	/**
@@ -44,88 +47,93 @@ class Feature
 	 * @param string The name of the feature
 	 * @return bool
 	**/
-	function can( $feature )
+	public static function can( $feature )
 	{
 		$array = config_item('features');
 		
-		//	Is it in an invalid format?
+		// Is it in an invalid format?
 		if ( ! is_array( $array ) )
 			return FALSE;
-			
-		//	Loop though each feature
+          
+          // Are they logged in?
+          if ( is_null(self::$current_user) AND ! is_bool( self::$current_user ) OR self::$current_user < 1)
+               return FALSE;
+          
+		// Loop though each feature
 		foreach($array as $name => $row) {
 			if ($name == $feature) :
 				if ($row['restrict_type'] == 'general') {
-					//	It's a general on/off switch.
+					// It's a general on/off switch.
 					if ($row['status'] !== 'on')
 						return FALSE;
 					else
 						return TRUE;
 				} elseif ($row['restrict_type'] == 'user_specific') {
-					//	It's a user bucket.
-					//	Why try!
-					if ( ! $this->current_user )
+					// It's a user bucket.
+					// Why try!
+					if ( ! self::$current_user )
 						return FALSE;
-					//	var_dump( $name, $row );
+					// var_dump( $name, $row );
 		
-					//	It's a userspecific one
-					if ($row['search_variable'] !== '=' && $row['search_variable'] !== '>' && $row['search_variable'] !== '>=' && $row['search_variable'] !== '<' && $row['search_variable'] !== '<==' && $row['search_variable'] !== '!==')
-						return FALSE;	//	Validate search terms.
+					// It's a userspecific one
+					if ($row['search_variable'] !== '=' AND $row['search_variable'] !== '>' AND $row['search_variable'] !== '>='
+					     AND $row['search_variable'] !== '<' AND $row['search_variable'] !== '<==' AND $row['search_variable'] !== '!==')
+						return FALSE;	// Validate search terms.
 					
-					//	What type of select users.
+					// What type of select users.
 					switch($row['search_variable'])
 					{
-						case('>');
+						case '>' :
 							if (is_array($row['search_term']))
-								return FALSE;	//	String only!
+								return FALSE;	// String only!
 							
-							if ($this->current_user > $row['search_term'])
+							if (self::$current_user > $row['search_term'])
 								return TRUE;
 							else;
 								return TRUE;
 						break;
 						
-						case('>=');
+						case '>=' :
 							if (is_array($row['search_term']))
-								return FALSE;	//	String only!
+								return FALSE;	// String only!
 							
-							if ($this->current_user >= $row['search_term'])
+							if (self::$current_user >= $row['search_term'])
 								return TRUE;
 							else;
 								return TRUE;
 						break;
 						
-						case('<');
+						case '<' :
 							if (is_array($row['search_term']))
-								return FALSE;	//	String only!
+								return FALSE;	// String only!
 							
-							if ($this->current_user <= $row['search_term'])
+							if (self::$current_user <= $row['search_term'])
 								return TRUE;
 							else;
 								return TRUE;
 						break;
 						
-						case('<=');
+						case '<=' :
 							if (is_array($row['search_term']))
-								return FALSE;	//	String only!
+								return FALSE;	// String only!
 							
-							if ($this->current_user <= $row['search_term'])
+							if (self::$current_user <= $row['search_term'])
 								return TRUE;
 							else;
 								return TRUE;
 						break;
 						
-						case('!=');
+						case '!=' :
 							if (is_array($row['search_term'])) :
-								//	Loop through an array.
+								// Loop through an array.
 								foreach($row['search_term'] as $rua)
 								{
-									if ($this->current_user == $rua)
+									if (self::$current_user == $rua)
 										return FALSE;
 								}
 								return TRUE;
 							else :
-							if ($this->current_user != $row['search_term'])
+							if (self::$current_user != $row['search_term'])
 								return TRUE;
 							else;
 								return TRUE;
@@ -133,15 +141,15 @@ class Feature
 							endif;
 						break;
 						
-						//	Defaults to "="
+						// Defaults to "="
 						default;
 							if (is_array($row['search_term'])) {
-								if (in_array($this->current_user, $row['search_term']))
+								if (in_array(self::$current_user, $row['search_term']))
 									return TRUE;
 								else
 									return FALSE;
 							} else {
-								if ($row['search_term'] == $this->current_user)
+								if ($row['search_term'] == self::$current_user)
 									return TRUE;
 								else
 									return FALSE;
@@ -149,7 +157,7 @@ class Feature
 							break;
 					}
 				} else {
-					//	We haven't created this type yet
+					// We haven't created this type yet
 					return FALSE;
 				}
 			endif;
@@ -158,4 +166,16 @@ class Feature
 	}
 }
 
-/* End of file feature.php */
+/**
+ * Helper function to see if a user can do a feature
+ *
+ * @access public
+ * @return bool
+ * @see Feature::can()
+**/
+function can_do_feature($which)
+{
+	return Feature::can($which);
+}
+
+/* End of file */
