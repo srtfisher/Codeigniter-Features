@@ -3,7 +3,7 @@
  * The feature release system
  * We can release "features" to users and only enable it to be show to certain users.
  * 
- * @version    0.4
+ * @version    0.5
  * @author     srtfisher
  * @license    GPL
 **/
