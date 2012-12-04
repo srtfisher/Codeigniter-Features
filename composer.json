@@ -1,7 +1,7 @@
 {
   "name": "srtfisher/codeigniter-features",
   "description": "Codeigniter Feature Flags",
-  "version": "0.3",
+  "version": "0.4",
   "keywords": [
     "codeigniter",
     "feature flag",
@@ -18,5 +18,9 @@
   ],
   "require": {
     "php": ">=5.2"
-  }
+  },
+  
+  "autoload": {
+	  "classmap": ["libraries/Feature.php"]
+	}
 }
